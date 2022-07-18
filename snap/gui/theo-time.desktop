@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Theo TIme
+Comment=Schedule Auto Shutdowns
+Exec=theo-time
+Icon=${SNAP}/meta/gui/theo-time.png
+Terminal=false
+Type=Application
+Categories=Utility;
+
