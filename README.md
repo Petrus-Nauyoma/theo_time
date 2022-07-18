@@ -1,4 +1,4 @@
-# theo_time
+# tTheo Time
 
 Shutdown computer at a specified time
 
