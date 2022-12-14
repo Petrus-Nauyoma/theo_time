@@ -3,8 +3,8 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:process_run/shell.dart';
-import '../main.dart';
 import '../widgets/info_sheet.dart';
+import '../widgets/light_switch.dart';
 
 class SetTime extends StatefulWidget {
   const SetTime({Key? key}) : super(key: key);
@@ -19,7 +19,7 @@ class _SetTimeState extends State<SetTime> {
 
   String _valueSaved1 = '';
 
-  int setTime = 0;
+  var setTime;
 
   @override
   void initState() {
@@ -27,18 +27,20 @@ class _SetTimeState extends State<SetTime> {
     _timeController = TextEditingController(text: DateTime.now().toString());
   }
 
-  int _convertToMinutes(String valueTime) {
+  _convertToMinutes(String valueTime) {
     DateTime dtNow = DateTime.now();
     DateTime dt = DateTime.parse(valueTime.toString());
-    Duration difference = dt.difference(dtNow);
-    int timeInMinutes = difference.inMinutes;
-    return timeInMinutes;
+    var difference = dt.difference(dtNow);
+    int timeInSeconds = difference.inSeconds;
+    shell.run('''
+          shutdown -s -t $timeInSeconds
+          ''');
+    return valueTime;
   } //convert dateTime from user into minutes which is used to set the shutdown timer
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -83,7 +85,6 @@ class _SetTimeState extends State<SetTime> {
                       ),
                     ),
                   );
-                  await shutDownNow();
                 },
                 child: const Text(
                   'Set Time',
@@ -116,7 +117,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 1
+          shutdown -s -t 60
           ''');
                       },
                       child: const Text(
@@ -142,7 +143,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 5 --halt 1
+          shutdown -s -t 300
           ''');
                       },
                       child: const Text(
@@ -169,7 +170,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 10 --halt 1
+          shutdown -s -t 600
           ''');
                       },
                       child: const Text(
@@ -195,7 +196,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 15 --halt 1
+          shutdown -s -t 900
           ''');
                       },
                       child: const Text(
@@ -221,7 +222,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 30 --halt 1
+          shutdown -s -t 1800
           ''');
                       },
                       child: const Text(
@@ -255,7 +256,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 60 --halt 1
+          shutdown -s -t 3600
           '''); //run shell command to shutdown after 60 minutes
                       },
                       child: const Text(
@@ -281,7 +282,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 120 --halt 1
+         shutdown -s -t 7200
           ''');
                       },
                       child: const Text(
@@ -299,7 +300,8 @@ class _SetTimeState extends State<SetTime> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             duration: const Duration(seconds: 3),
-                            content: const Text('Shutting down in e hours.'),
+                            content:
+                                const Text('Shutting down in three hours.'),
                             action: SnackBarAction(
                               label: 'Undo',
                               onPressed: shutDownCancel,
@@ -307,7 +309,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 180 --halt 1
+          shutdown -s -t 10800
           ''');
                       },
                       child: const Text(
@@ -332,7 +334,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 360 --halt 1
+          shutdown -s -t 21600
           ''');
                       },
                       child: const Text(
@@ -357,7 +359,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 720 --halt 1
+          shutdown -s -t 43200
           ''');
                       },
                       child: const Text(
@@ -382,7 +384,7 @@ class _SetTimeState extends State<SetTime> {
                           ),
                         );
                         await shell.run('''
-          shutdown 1440 --halt 1
+          shutdown -s -t 86400
           ''');
                       },
                       child: const Text(
@@ -397,53 +399,30 @@ class _SetTimeState extends State<SetTime> {
           ),
         ),
       ),
-      persistentFooterButtons: const [
-        Text('Developed by akillix.com'),
-        SizedBox(
+      persistentFooterButtons: [
+        ElevatedButton(
+          onPressed: shutDownCancel,
+          child: const Text('Cancel shutdown.'),
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('Developed by akillix.com'),
+        const SizedBox(
           width: 2,
         ),
-        InfoSheet(),
-        SizedBox(
+        const InfoSheet(),
+        const SizedBox(
           width: 2,
         ),
-        LightSwitch(),
+        const LightSwitch(),
       ],
     );
   }
 
-  Future<List<ProcessResult>> shutDownNow() async {
-    return await shell.run('''
-        shutdown $setTime --halt 1
-        ''');
-  } //shutsdown the computer after giving a minute to undo.
-
   void shutDownCancel() async {
     await shell.run('''
-          shutdown -c
+          shutdown /a
           ''');
   } //cancel the most recent shutdown command
-}
-
-class LightSwitch extends StatelessWidget {
-  const LightSwitch({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-        tooltip: "Theme",
-        icon: Icon(
-          MyApp.themeNotifier.value == ThemeMode.light
-              ? Icons.dark_mode
-              : Icons.light_mode,
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-        ),
-        onPressed: () {
-          MyApp.themeNotifier.value =
-              MyApp.themeNotifier.value == ThemeMode.light
-                  ? ThemeMode.dark
-                  : ThemeMode.light;
-        });
-  }
 }

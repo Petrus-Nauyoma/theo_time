@@ -11,7 +11,6 @@ void main() {
     const initialSize = Size(570, 550);
     win.minSize = initialSize;
     win.size = initialSize;
-
     win.alignment = Alignment.center;
     win.title = "Theo Time";
     win.show();
